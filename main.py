@@ -3,10 +3,12 @@ import PSO
 import Robust_PSO
 import openpyxl
 import numpy as np
+from openpyxl import load_workbook
 
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from matplotlib.colors import LogNorm
+
 
 def run():
 
@@ -52,11 +54,11 @@ def run():
             data.append(Robust_PSO.SFPSO(benchmark, T, m, e))
             data.append(Robust_PSO.SWPSO(benchmark, T, m, e))
 
-            print(name + ' ' + str(times))
             for i in range(0, num):
-                for j in range(0, data[i].__len__()):
-                    sheets[i + 1].cell(row=j + 2, column=times + 2).value = data[i][j]
-
+                for j in range(0, data[i][0].__len__()):
+                    sheets[i + 1].cell(row=j + 2, column=times + 2).value = data[i][0][j]
+                sheets[i+1].cell(row=data[i][0].__len__()+2,column=times+2).value = data[i][1][0][0]    # x
+                sheets[i+1].cell(row=data[i][0].__len__()+3,column=times+2).value = data[i][1][0][1]    # y
             times += 1
 
         avg = []
@@ -70,14 +72,14 @@ def run():
             for j in range(0, Time):
                 sheets[i + 1].cell(row=1, column=j + 2).value = j + 1
 
-            for j in range(0, data[i].__len__()):
+            for j in range(0, data[i][0].__len__()):
                 sheets[i + 1].cell(row=j + 2, column=1).value = (j + 1) * N
 
             for col in range(2, sheets[i + 1].max_column + 1):
                 # if sheets[i + 1].cell(row=sheets[i + 1].max_row, column=col).value < benchmarks[index].goal:
                 selected[i].append(col)
 
-            for row in range(2, sheets[i + 1].max_row + 1):
+            for row in range(2, sheets[i + 1].max_row - 1):
                 avg[i].append(0)
                 for col in selected[i]:
                     avg[i][row - 2] += sheets[i + 1].cell(row=row, column=col).value
@@ -122,7 +124,6 @@ def run():
     #
     # wbk.save('.//result//' + 'result' + '.xlsx')
 
-
 def test():
 
     # number of particles
@@ -138,30 +139,51 @@ def test():
 
     b = benchmarks.testRobust(N, D)
 
-    t = np.zeros([1,2])
-    t[0][0]=0.4
-    t[0][1]=0.2
-    print(b.getValue(t)+35)
+    # t = np.zeros([1,2])
+    # t[0][0]=0.4
+    # t[0][1]=0.2
+    # print(b.getValue(t)+35)
+    #
+    # t[0][0] = 2
+    # t[0][1] = 1
+    # print(b.getValue(t)+35)
+    #
+    # t[0][0] = 2.8
+    # t[0][1] = 4.0
+    # print(b.getValue(t)+35)
+    #
+    # t[0][0] = 1
+    # t[0][1] = 2.5
+    # print(b.getValue(t) + 35)
 
-    t[0][0] = 2
-    t[0][1] = 1
-    print(b.getValue(t)+35)
+    data = []
+    for i in range(0,2):
+        data.append(PSO.PSO(b, T))
 
-    t[0][0] = 2.8
-    t[0][1] = 4.0
-    print(b.getValue(t)+35)
-
-    t[0][0] = 1
-    t[0][1] = 2.5
-    print(b.getValue(t) + 35)
-    # PSO.PSO(b, T)
+    print(type(data))
+    print(data[0])
+    print(data[1])
+    print(data[1][0])
+    # print(PSO.PSO(b, T)[1][0][0]) # x
+    # print(PSO.PSO(b, T)[1][0][1]) # y
     # Robust_PSO.PSO(b, T, m, e)
     # Robust_PSO.SFPSO(b, T, m, e)
     # Robust_PSO.RPSO(b, T, m, e)
     # Robust_PSO.SWPSO(b, T, m, e)
 
 
-def draw():
+def draw(filename):
+
+    wb = load_workbook('.//result//' + filename + '.xlsx', read_only=True)
+    sheet = wb.get_sheet_by_name("RobustPSO")
+
+    point_x = []
+    point_y = []
+
+    for i in range(2,sheet.max_column+1):
+        point_x.append(sheet.cell(row=sheet.max_row-1, column=i).value)
+        point_y.append(sheet.cell(row=sheet.max_row, column=i).value)
+
     div = 200
     N = div*div
     D = 2
@@ -184,8 +206,8 @@ def draw():
     plt.imshow(z+35, extent=(np.amin(x), np.amax(x), np.amin(y), np.amax(y)),
                cmap=cm.hot, norm=LogNorm())
     plt.colorbar()
-    plt.plot([0.3, 2.8, 1], [2, 4, 2.5], 'bo')
+    plt.plot(point_x, point_y, 'bo', marker='.', ms=5)
     plt.show()
 
 if __name__ == '__main__':
-    draw()
+    draw("testBenchmark")

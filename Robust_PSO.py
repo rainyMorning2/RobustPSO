@@ -68,7 +68,7 @@ def PSO(benchmark, T, m, e):
         'print(bestFitness)'
     #print(bestFitness)
     #print(Gb)
-    return fitData
+    return [fitData, Gb]
 
 
 def SFPSO(benchmark, T, m, e):
@@ -141,7 +141,7 @@ def SFPSO(benchmark, T, m, e):
         'print(bestFitness)'
     #print(bestFitness)
     #print(Gb)
-    return fitData
+    return [fitData, Gb]
 
 
 def RPSO(benchmark, T, m, e):
@@ -214,7 +214,7 @@ def RPSO(benchmark, T, m, e):
         'print(bestFitness)'
     #print(bestFitness)
     #print(Gb)
-    return fitData
+    return [fitData, Gb]
 
 
 def SWPSO(benchmark, T, m, e):
@@ -287,4 +287,4 @@ def SWPSO(benchmark, T, m, e):
         'print(bestFitness)'
     #print(bestFitness)
     #print(Gb)
-    return fitData
+    return [fitData, Gb]

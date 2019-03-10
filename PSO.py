@@ -51,7 +51,7 @@ def PSO(benchmark, T):
         'print(bestFitness)'
     #print(bestFitness)
     #print(Gb)
-    return fitData
+    return [fitData, Gb]
 
 
 def SFPSO(benchmark, T):
@@ -114,4 +114,4 @@ def SFPSO(benchmark, T):
         fitData.append(bestFitness)
         'print(bestFitness)'
     'print(bestFitness)'
-    return fitData
+    return [fitData, Gb]
