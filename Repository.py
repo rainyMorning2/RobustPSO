@@ -1,9 +1,9 @@
 import numpy as np
-import sys
+import matplotlib.pyplot as plt
+import gc
 
 def isDominated(value1, value2):
     # return whether value1 dominates value2 or not
-
     flag = False
     for x, y in zip(value1, value2):
         if x > y:
@@ -20,79 +20,95 @@ def isDominated(value1, value2):
 class Repository(object):
     __storedFit = []
     __storedPos = []
+    __x = 10
+    __grid = list([])
 
     def __init__(self, maxSize, divisions):
         self.maxSize = maxSize
         self.divisions = divisions
 
+    def __rouletteWheel(self):
+        random_pro = np.random.rand()
+        __sum = 0
+        for i in range(0, len(self.__grid)):
+            __sum += self.__grid[i][2]
+            if random_pro <= __sum:
+                return i
+
+    def __genDeletePro(self):
+        for item in self.__grid:
+            item[2] = len(item[1]) / self.size()
+
+    def __genSelectPro(self):
+        __sum = 0
+        for item in self.__grid:
+            item[2] = self.__x / len(item[1])
+            __sum += self.__x / len(item[1])
+
+        # Normalize
+        for item in self.__grid:
+            item[2] /= __sum
+
+    def updateGrid(self):
+        maxFit = np.max(self.__storedFit, axis=0)
+        minFit = np.min(self.__storedFit, axis=0)
+        deta = (maxFit - minFit) / self.divisions
+        id = np.floor((self.__storedFit - minFit) / deta).astype(np.int)
+        id[id == self.divisions] = self.divisions - 1
+        # means position , particle indexes which are in current position , probability (select or delete)
+        self.__grid = []
+        gc.collect()
+        self.__grid.append([id[0], [0], 0])
+
+        for i in range(1, self.size()):
+            for j in range(0, len(self.__grid)):
+                if np.all(self.__grid[j][0] == id[i]):
+                    self.__grid[j][1].append(i)
+                else:
+                    self.__grid.append([id[i], [i], 0])
+
+        while self.size() > self.maxSize:
+            self.__genDeletePro()
+            index = np.random.choice(self.__grid[self.__rouletteWheel()][1])
+            del self.__storedPos[index]
+            del self.__storedFit[index]
+
+
+    def insert(self, itemPos, itemFit):
+        for i in range(self.size() - 1, -1, -1):
+            if isDominated(self.__storedFit[i], itemFit):
+                return
+            elif isDominated(itemFit, self.__storedFit[i]):
+                del self.__storedFit[i]
+                del self.__storedPos[i]
+
+        self.__storedFit.append(itemFit)
+        self.__storedPos.append(itemPos)
+
     def size(self):
         return len(self.__storedFit)
 
-    def get(self, index):
-        if index < len(self.__storedFit):
-            return self.__storedFit[index]
-        else:
-            raise IndexError
+    def get(self):
+        self.__genSelectPro()
+        return self.__storedPos[np.random.choice(self.__grid[self.__rouletteWheel()][1])]
 
     def info(self):
         print(self.size())
         print(self.__storedPos)
         print(self.__storedFit)
 
-    def __genGrid(self):
-        maxFit = np.max(self.__storedFit, axis=0)
-        minFit = np.min(self.__storedFit, axis=0)
-        deta = (maxFit - minFit)/self.divisions
-        id = np.floor((self.__storedFit - minFit)/deta).astype(np.int)
-        id[id == self.divisions] = self.divisions - 1
-        grid = list([])
+    def plot(self):
+        plt.plot(0-np.array(self.__storedFit)[:, 0], 0-np.array(self.__storedFit)[:, 1], "o", ms=5)
+        plt.xlabel('$f_{1}$')
+        plt.ylabel('$f_{2}$')
+        plt.show()
 
-        # means position , particle indexes which are in current position , probability (equals to n/size )
-        grid.append([id[0], [0], 0])
-
-        for i in range(1, len(id)):
-            for j in range(0, len(grid)):
-                if np.all(grid[j][0] == id[i]):
-                    grid[j][1].append(i)
-                else:
-                    grid.append([id[i], [i], 0])
-        
-
-        return id, grid
-
-    def insert(self, itemPos, itemFit):
-        if self.size() == 0:
-            self.__storedFit.append(itemFit)
-            self.__storedPos.append(itemPos)
-        else:
-            for i in range(self.size() - 1, -1, -1):
-                if isDominated(self.__storedFit[i], itemFit):
-                    return
-                elif isDominated(itemFit, self.__storedFit[i]):
-                    self.__storedFit.remove(self.__storedFit[i])
-                    self.__storedPos.remove(self.__storedPos[i])
-
-            if self.size() < self.maxSize:
-                self.__storedFit.append(itemFit)
-                self.__storedPos.append(itemPos)
-            else:
-                # using Grid to eliminate items
-                id , grid = self.__genGrid()
-                print(grid)
-
-
-
-    def remove(self, index):
-        if index < len(self.__storedFit):
-            self.__storedFit.remove(self.__storedFit[index])
-            self.__storedPos.remove(self.__storedPos[index])
-        else:
-            raise IndexError
+    def save(self):
+        np.savetxt("result.txt", self.__storedFit)
 
 
 if __name__ == '__main__':
     repo = Repository(2, 30)
-    repo.info()
     a = [2, 3]
     b = [2, 2]
     c = [3, 5]
@@ -111,5 +127,9 @@ if __name__ == '__main__':
     repo.info()
     repo.insert(d, df)
     repo.info()
+    repo.insert(e, ef)
+    repo.info()
+    repo.plot()
+
 
 

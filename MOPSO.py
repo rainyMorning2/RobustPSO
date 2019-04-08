@@ -1,20 +1,20 @@
 import numpy as np
+import Repository
+import MObenchmarks
 
 
 def checkBoundary(position, velocity, low, high):
     for i in range(0, position.shape[0]):
         for j in range(0, position.shape[1]):
-            if position[i][j] < low[i]:
-                position[i][j] = low[i]
+            if position[i][j] < low[j]:
+                position[i][j] = low[j]
                 velocity[i] *= -1
-            if position[i][j] > high[i]:
-                position[i][j] = high[i]
+            if position[i][j] > high[j]:
+                position[i][j] = high[j]
                 velocity[i] *= -1
-
 
 def isDominated(value1, value2):
     # return whether value1 dominates value2 or not
-
     flag = False
     for x, y in zip(value1, value2):
         if x > y:
@@ -40,7 +40,7 @@ def MOPSO(benchmark, T):
 
     position = np.random.rand(N, D) * (benchmark.high - benchmark.low) + benchmark.low
     velocity = np.zeros([N, D])
-
+    repo = Repository.Repository(repsize, divisions)
     pb = position
     storedFit, storedCons = benchmark.getValue(pb)
 
@@ -67,7 +67,10 @@ def MOPSO(benchmark, T):
         # evaluate particles 1
         currentFit, currentCons = benchmark.getValue(position)
 
-        # update repo
+        # update repo 1
+        for i in range(0, N):
+            repo.insert(position[i], currentFit[i])
+        repo.updateGrid()
 
         # update pb 1
         for i in range(0, N):
@@ -88,24 +91,21 @@ def MOPSO(benchmark, T):
                         storedFit[i] = currentFit[i]
                         pb = position[i]
 
-        # update vel
-        velocity += w * velocity + np.random.rand(N, D) * (pb - position) + np.random.rand(N, D) * (repo - position)
+        # update vel 1
+        velocity += w * velocity + np.random.rand(N, D) * (pb - position) + np.random.rand(N, D) * (repo.get() - position)
 
         # update position 1
         position += velocity
 
         t += 1
-
+        print(t)
+    return repo
 
 def main():
     pass
 
 
 if __name__ == '__main__':
-    low = [0, 0]
-    high = [1, 30]
-    v=[[[] for i in range(3)] for j in range(3)]
-    print(v)
-    print(v[0][1].append(2))
-    print(v[0][1].append(23))
-    print(v)
+    benchmark = MObenchmarks.f1(10)
+    repo = MOPSO(benchmark, 20)
+    repo.plot()
