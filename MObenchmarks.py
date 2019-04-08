@@ -17,8 +17,8 @@ class f1(object):
 
         for i in range(0, self.N):
 
-            result[i][0] = -position[i][0] ** 2 + position[i][1]
-            result[i][1] = 1.0 / 2 * position[i][0] + position[i][1] + 1
+            result[i][0] = -(-position[i][0] ** 2 + position[i][1])
+            result[i][1] = -(1.0 / 2 * position[i][0] + position[i][1] + 1)
 
             if ~(1.0 / 6 * position[i][0] + position[i][1] - 13.0 / 2 <= 0):
                 cnt[i] += 1
