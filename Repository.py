@@ -57,26 +57,33 @@ class Repository(object):
         id[id == self.divisions] = self.divisions - 1
         # means position , particle indexes which are in current position , probability (select or delete)
         self.__grid = []
-        gc.collect()
         self.__grid.append([id[0], [0], 0])
-
         for i in range(1, self.size()):
             for j in range(0, len(self.__grid)):
                 if np.all(self.__grid[j][0] == id[i]):
                     self.__grid[j][1].append(i)
                 else:
                     self.__grid.append([id[i], [i], 0])
+                break
 
         while self.size() > self.maxSize:
             self.__genDeletePro()
-            index = np.random.choice(self.__grid[self.__rouletteWheel()][1])
+            pos = self.__rouletteWheel()
+            index = np.random.choice(self.__grid[pos][1])
             del self.__storedPos[index]
             del self.__storedFit[index]
+            self.__grid[pos][1].remove(index)
+            if len(self.__grid[pos][1]) == 0:
+                del self.__grid[pos]
+            for item in self.__grid:
+                for i in range(0, len(item[1])):
+                    if item[1][i] > index:
+                        item[1][i] -= 1
 
 
     def insert(self, itemPos, itemFit):
         for i in range(self.size() - 1, -1, -1):
-            if isDominated(self.__storedFit[i], itemFit):
+            if np.all(abs(self.__storedFit[i] == itemFit)) or isDominated(self.__storedFit[i], itemFit):
                 return
             elif isDominated(itemFit, self.__storedFit[i]):
                 del self.__storedFit[i]
@@ -90,14 +97,20 @@ class Repository(object):
 
     def get(self):
         self.__genSelectPro()
-        return self.__storedPos[np.random.choice(self.__grid[self.__rouletteWheel()][1])]
+        c = self.__rouletteWheel()
+        b = self.__grid[c][1]
+        a = np.random.choice(b)
+        return self.__storedPos[a]
 
     def info(self):
         print(self.size())
         print(self.__storedPos)
         print(self.__storedFit)
+        print(self.__grid)
 
     def plot(self):
+        true = np.loadtxt("Kita_fun.dat")
+        plt.plot(true[:, 0], true[:, 1], "ro", ms=5)
         plt.plot(0-np.array(self.__storedFit)[:, 0], 0-np.array(self.__storedFit)[:, 1], "o", ms=5)
         plt.xlabel('$f_{1}$')
         plt.ylabel('$f_{2}$')
@@ -108,28 +121,30 @@ class Repository(object):
 
 
 if __name__ == '__main__':
-    repo = Repository(2, 30)
-    a = [2, 3]
-    b = [2, 2]
-    c = [3, 5]
-    d = [4, 7]
-    e = [1, 0]
-    af = [20, 40]
-    bf = [30, 50]
-    cf = [25, 20]
-    df = [50, 10]
-    ef = [5, 5]
-    repo.insert(a, af)
-    repo.info()
-    repo.insert(b, bf)
-    repo.info()
-    repo.insert(c, cf)
-    repo.info()
-    repo.insert(d, df)
-    repo.info()
-    repo.insert(e, ef)
-    repo.info()
+
+    repo = Repository(3, 30)
     repo.plot()
+    # a = [2, 3]
+    # b = [2, 2]
+    # c = [3, 5]
+    # d = [4, 7]
+    # e = [1, 0]
+    # af = [20, 40]
+    # bf = [30, 35]
+    # cf = [25, 20]
+    # df = [50, 10]
+    # ef = [5, 5]
+    # repo.insert(a, af)
+    # repo.info()
+    # repo.insert(b, bf)
+    # repo.info()
+    # repo.insert(c, cf)
+    # repo.info()
+    # repo.insert(d, df)
+    #
+    # repo.updateGrid()
+    # repo.info()
+    # print(repo.get())
 
 
 
