@@ -80,10 +80,9 @@ class Repository(object):
                     if item[1][i] > index:
                         item[1][i] -= 1
 
-
     def insert(self, itemPos, itemFit):
         for i in range(self.size() - 1, -1, -1):
-            if np.all(abs(self.__storedFit[i] == itemFit)) or isDominated(self.__storedFit[i], itemFit):
+            if np.all(abs(self.__storedFit[i] - itemFit) < 1e-4) or isDominated(self.__storedFit[i], itemFit):
                 return
             elif isDominated(itemFit, self.__storedFit[i]):
                 del self.__storedFit[i]
@@ -109,21 +108,23 @@ class Repository(object):
         print(self.__grid)
 
     def plot(self):
-        true = np.loadtxt("Kita_fun.dat")
-        plt.plot(true[:, 0], true[:, 1], "ro", ms=5)
-        plt.plot(0-np.array(self.__storedFit)[:, 0], 0-np.array(self.__storedFit)[:, 1], "o", ms=5)
+        true = np.loadtxt("Kursawe_fun.dat")
+        plt.plot(true[:, 0], true[:, 1], "r.", ms=2)
+        plt.plot(np.array(self.__storedFit)[:, 0], np.array(self.__storedFit)[:, 1], "+", ms=5)
         plt.xlabel('$f_{1}$')
         plt.ylabel('$f_{2}$')
         plt.show()
 
-    def save(self):
-        np.savetxt("result.txt", self.__storedFit)
+    def save(self, filename):
+        np.savetxt(filename, self.__storedFit)
 
 
 if __name__ == '__main__':
 
     repo = Repository(3, 30)
+
     repo.plot()
+
     # a = [2, 3]
     # b = [2, 2]
     # c = [3, 5]
