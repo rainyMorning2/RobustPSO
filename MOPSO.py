@@ -1,7 +1,6 @@
 import numpy as np
 import Repository
-import MObenchmarks
-import matplotlib.pyplot as plt
+
 
 def checkBoundary(position, velocity, low, high):
     for i in range(0, position.shape[0]):
@@ -47,10 +46,10 @@ def MOPSO(benchmark, T):
     t = 0
     while t < T:
 
-        # check boundary 1
+        # check boundary
         checkBoundary(position, velocity, benchmark.low, benchmark.high)
 
-        # mutation 1
+        # mutation
         if (1 - 1.0 * t / T) ** (5.0 / mutrate) != 0:
             for i in range(0, N):
                 dim = np.random.randint(0, D)
@@ -64,26 +63,18 @@ def MOPSO(benchmark, T):
                     lb = benchmark.low[dim]
                 position[i][dim] = np.random.rand() * (hb - lb) + lb
 
-        # evaluate particles 1
+        # evaluate particles
         currentFit, currentCons = benchmark.getValue(position)
 
-        # update repo 1
-        if np.any(currentCons == 0):
-            for i in np.where(currentCons == 0)[0]:
-                repo.insert(position[i], currentFit[i])
-        elif np.any(currentCons == 1):
-            for i in np.where(currentCons == 1)[0]:
-                repo.insert(position[i], currentFit[i])
-        elif np.any(currentCons == 2):
-            for i in np.where(currentCons == 2)[0]:
-                repo.insert(position[i], currentFit[i])
-        else:
-            for i in range(0, N):
-                repo.insert(position[i], currentFit[i])
-
+        # update repo
+        for j in range(0, K):
+            if np.any(currentCons == j):
+                for i in np.where(currentCons == j)[0]:
+                    repo.insert(currentFit[i], position[i])
+                break
         repo.updateGrid()
 
-        # update pb 1
+        # update pb
         for i in range(0, N):
             if currentCons[i] < storedCons[i]:
                 storedCons[i] = currentCons[i]
@@ -102,37 +93,12 @@ def MOPSO(benchmark, T):
                         storedFit[i] = currentFit[i]
                         pb[i] = position[i]
 
-        # update vel 1
-
+        # update vel
         velocity += w * velocity + np.random.rand(N, D) * (pb - position) + np.random.rand(N, D) * (repo.get() - position)
         velocity[velocity > 4] = 4
         velocity[velocity < -4] = -4
-        # update position 1
+        # update position
         position += velocity
         t += 1
         print(t)
     return repo.getAll()
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    benchmark1 = MObenchmarks.f1(100)
-    benchmark2 = MObenchmarks.f2(100)
-    for i in range(0, 30):
-        repo = MOPSO(benchmark1, 50)
-        filename = ".//result//f1"+ str(i) + ".txt"
-        np.savetxt(filename, repo)
-
-    true = np.loadtxt("Kita_fun.dat")
-    for i in range(0, 30):
-        filename = ".//result//f1" + str(i) + ".txt"
-        file = np.loadtxt(filename)
-        plt.plot(0-np.array(file)[:, 0], 0-np.array(file)[:, 1], "b+", ms=5)
-
-    plt.plot(true[:, 0], true[:, 1], "r.", ms=2)
-
-    plt.xlabel('$f_{1}$')
-    plt.ylabel('$f_{2}$')
-    plt.show()
