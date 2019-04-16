@@ -1,7 +1,5 @@
 import numpy as np
-import MObenchmarks
 import copy
-import matplotlib.pyplot as plt
 
 DEFAULTSIZE = 4
 
@@ -310,15 +308,13 @@ def NSGA_II(benchmark, T):
 
         checkBoundary(position, benchmark.low, benchmark.high)
         fitness, cnt = benchmark.getValue(position)
-        # print(position)
-        # print(fitness)
+
         if t != 0:
             fitness = np.row_stack((fitness, parentsFit))
             cnt = np.append(cnt, storedCnt)
 
         rank, nondominatedSet = fastNonDominatedSort(fitness, cnt)
         distance = np.zeros(len(rank))
-        # print(nondominatedSet)
         for subfitness in nondominatedSet:
 
             crowdingDistanceAssignment(subfitness, distance)
@@ -334,14 +330,12 @@ def NSGA_II(benchmark, T):
                     selected.append(temp[i][0])
                 break
 
-        # print(selected)
         # select()
         for i in range(0, N):
             parent = binaryTournament(rank, distance, selected)
             parents.append(parent)
 
         # crossover()
-        # print(parents)
         for i in range(0, N // 2):
 
             offsetBit[2 * i] = parentsBit[parents[2 * i] - N] if parents[2 * i] > N - 1 else positionBit[parents[2 * i]]
@@ -380,19 +374,4 @@ def NSGA_II(benchmark, T):
         Gb.append(item[1])
 
     return Gb
-
-
-def main():
-    benchmark = MObenchmarks.f1(100)
-    gb = NSGA_II(benchmark, 50)
-    true = np.loadtxt("Kita_fun.dat")
-    plt.plot(true[:, 0], true[:, 1], "r.", ms=2)
-    plt.plot(0-np.array(gb)[:, 0], 0-np.array(gb)[:, 1], "+", ms=5)
-    plt.xlabel('$f_{1}$')
-    plt.ylabel('$f_{2}$')
-    plt.show()
-
-
-if __name__ == '__main__':
-    main()
 
