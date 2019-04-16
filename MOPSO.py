@@ -111,7 +111,7 @@ def MOPSO(benchmark, T):
         position += velocity
         t += 1
         print(t)
-    return repo
+    return repo.getAll()
 
 def main():
     pass
@@ -123,7 +123,7 @@ if __name__ == '__main__':
     for i in range(0, 30):
         repo = MOPSO(benchmark1, 50)
         filename = ".//result//f1"+ str(i) + ".txt"
-        repo.save(filename)
+        np.savetxt(filename, repo)
 
     true = np.loadtxt("Kita_fun.dat")
     for i in range(0, 30):
