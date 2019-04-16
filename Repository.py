@@ -1,6 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import gc
 
 def isDominated(value1, value2):
     # return whether value1 dominates value2 or not
@@ -100,6 +99,9 @@ class Repository(object):
         b = self.__grid[c][1]
         a = np.random.choice(b)
         return self.__storedPos[a]
+
+    def getAll(self):
+        return self.__storedFit
 
     def info(self):
         print(self.size())
