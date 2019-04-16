@@ -17,14 +17,14 @@ def isDominated(value1, value2):
 
 
 class Repository(object):
-    __storedFit = []
-    __storedPos = []
-    __x = 10
-    __grid = list([])
 
-    def __init__(self, maxSize, divisions):
+    def __init__(self, maxSize, divisions=1):
         self.maxSize = maxSize
         self.divisions = divisions
+        self.__storedFit = []
+        self.__storedPos = []
+        self.__x = 10
+        self.__grid = list([])
 
     def __rouletteWheel(self):
         random_pro = np.random.rand()
@@ -79,7 +79,7 @@ class Repository(object):
                     if item[1][i] > index:
                         item[1][i] -= 1
 
-    def insert(self, itemPos, itemFit):
+    def insert(self, itemFit, itemPos=None):
         for i in range(self.size() - 1, -1, -1):
             if np.all(abs(self.__storedFit[i] - itemFit) < 1e-4) or isDominated(self.__storedFit[i], itemFit):
                 return
@@ -95,10 +95,7 @@ class Repository(object):
 
     def get(self):
         self.__genSelectPro()
-        c = self.__rouletteWheel()
-        b = self.__grid[c][1]
-        a = np.random.choice(b)
-        return self.__storedPos[a]
+        return self.__storedPos[np.random.choice(self.__grid[self.__rouletteWheel()][1])]
 
     def getAll(self):
         return self.__storedFit
@@ -108,6 +105,11 @@ class Repository(object):
         print(self.__storedPos)
         print(self.__storedFit)
         print(self.__grid)
+
+    def clear(self):
+        self.__storedPos = []
+        self.__storedFit = []
+        self.__grid = list([])
 
     def plot(self):
         true = np.loadtxt("Kursawe_fun.dat")
