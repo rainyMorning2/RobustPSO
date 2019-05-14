@@ -1,4 +1,9 @@
+import RobustBenchmarks
+import MObenchmarks
 import benchmarks
+import NSGA_II
+import MOPSO
+import Repository
 import PSO
 import Robust_PSO
 import openpyxl
@@ -24,12 +29,12 @@ def run():
     # number of cal
     Time = 3
 
-    benchmark = [benchmarks.testRobust(N, 2),
-                 benchmarks.f1(N,20),
-                 benchmarks.f2(N,20),
-                 benchmarks.f3(N,20),
-                 benchmarks.f5(N,20),
-                 benchmarks.f6(N,2)]
+    benchmark = [RobustBenchmarks.testRobust(N, 2),
+                 RobustBenchmarks.f1(N, 20),
+                 RobustBenchmarks.f2(N, 20),
+                 RobustBenchmarks.f3(N, 20),
+                 RobustBenchmarks.f5(N, 20),
+                 RobustBenchmarks.f6(N, 2)]
 
     '算法数'
     num = 12
@@ -184,15 +189,17 @@ def test():
     # number of particles
     N = 50
     # dimensions
-    D = 20
+    D = 30
     # iteration times
-    T = 500
+    T = 5000
     # number of random particles
     m = 8
     # bias
     e = 0.2
 
-    b = benchmarks.f2(N, D)
+    b = benchmarks.Rosenbrock(N, D)
+
+    PSO.MPPSO(b, T)
 
     # t = np.zeros([1,2])
     # t[0][0]=0.4
@@ -211,12 +218,12 @@ def test():
     # t[0][1] = 2.5
     # print(b.getValue(t) + 35)
 
-    print(Robust_PSO.GPSO(b, T, m, e)[0][T-1])
-    print(Robust_PSO.LPSO(b, T, m, e)[0][T-1])
-    print(Robust_PSO.SFPSO(b, T, m, e)[0][T-1])
-    print(Robust_PSO.LFIPSO(b, T, m, e)[0][T-1])
-    print(Robust_PSO.SFIPSO(b, T, m, e)[0][T-1])
-    print(Robust_PSO.SIPSO(b, T, m, e)[0][T-1])
+    # print(Robust_PSO.GPSO(b, T, m, e)[0][T-1])
+    # print(Robust_PSO.LPSO(b, T, m, e)[0][T-1])
+    # print(Robust_PSO.SFPSO(b, T, m, e)[0][T-1])
+    # print(Robust_PSO.LFIPSO(b, T, m, e)[0][T-1])
+    # print(Robust_PSO.SFIPSO(b, T, m, e)[0][T-1])
+    # print(Robust_PSO.SIPSO(b, T, m, e)[0][T-1])
 
     # print(Robust_PSO.GPSO(b, T, m, e)[0])
     # print(Robust_PSO.LPSO(b, T, m, e)[0])
@@ -240,7 +247,7 @@ def draw(filename):
     N = div*div
     D = 2
 
-    b = benchmarks.testRobust(N, D)
+    b = RobustBenchmarks.testRobust(N, D)
     x, y = np.linspace(-0.6, 3.1, div), np.linspace(4.3, -0.3, div)
     position = np.zeros([N, D])
 
@@ -261,7 +268,45 @@ def draw(filename):
     plt.show()
 
 
+def MoRun():
+
+    # number of particles
+    N = 100
+    # iteration times
+    T = [40, 120, 40]
+    # number of cal
+    Time = 30
+
+    # allBenchmarks = [MObenchmarks.f1(N), MObenchmarks.f2(N), MObenchmarks.f3(N)]
+    allBenchmarks = [MObenchmarks.f3(N)]
+
+    for benchmark, t in zip(allBenchmarks, T):
+        repo = Repository.Repository(200)
+        fileName = ".//result//" + benchmark.name + "-MOPSO" + ".txt"
+        times = 0
+        while times < Time:
+            print("times= " + str(times))
+            data = MOPSO.MOPSO(benchmark, t)
+            for item in data:
+                repo.insert(item)
+
+            times += 1
+
+        repo.save(fileName)
+
+
+
 if __name__ == '__main__':
-    run()
-    # draw("testBenchmark")
-    # test()
+    # MoRun()
+    test()
+    # name1 = "Kita"
+    # name2 = "Kursawe"
+    # name3 = "ZDT4"
+    #
+    # true = np.loadtxt(name1+"_fun.dat")
+    # file = np.loadtxt(".//result//" + name1 + "-NSGA-II" + ".txt")
+    # plt.plot(0-np.array(file)[:, 0], 0-np.array(file)[:, 1], "b+", ms=5)
+    # plt.plot(true[:, 0], true[:, 1], "r.", ms=2)
+    # plt.xlabel('$f_{1}$')
+    # plt.ylabel('$f_{2}$')
+    # plt.show()
