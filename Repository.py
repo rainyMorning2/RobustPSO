@@ -21,10 +21,12 @@ class Repository(object):
     def __init__(self, maxSize, divisions=1):
         self.maxSize = maxSize
         self.divisions = divisions
+        self.cons = float('inf')
         self.__storedFit = []
         self.__storedPos = []
         self.__x = 10
-        self.__grid = list([])
+        self.__grid = []
+
 
     def __rouletteWheel(self):
         random_pro = np.random.rand()
@@ -79,16 +81,21 @@ class Repository(object):
                     if item[1][i] > index:
                         item[1][i] -= 1
 
-    def insert(self, itemFit, itemPos=None):
-        for i in range(self.size() - 1, -1, -1):
-            if np.all(abs(self.__storedFit[i] - itemFit) < 1e-4) or isDominated(self.__storedFit[i], itemFit):
-                return
-            elif isDominated(itemFit, self.__storedFit[i]):
-                del self.__storedFit[i]
-                del self.__storedPos[i]
+    def insert(self, itemFit, itemPos=None, itemCons=float('inf')):
+        if itemCons < self.cons:
+            self.cons = itemCons
+            self.clear()
 
-        self.__storedFit.append(itemFit)
-        self.__storedPos.append(itemPos)
+        if itemCons == self.cons:
+            for i in range(self.size() - 1, -1, -1):
+                if np.all(abs(self.__storedFit[i] - itemFit) < 1e-4) or isDominated(self.__storedFit[i], itemFit):
+                    return
+                elif isDominated(itemFit, self.__storedFit[i]):
+                    del self.__storedFit[i]
+                    del self.__storedPos[i]
+
+            self.__storedFit.append(itemFit)
+            self.__storedPos.append(itemPos)
 
     def size(self):
         return len(self.__storedFit)
@@ -109,7 +116,7 @@ class Repository(object):
     def clear(self):
         self.__storedPos = []
         self.__storedFit = []
-        self.__grid = list([])
+        self.__grid = []
 
     def plot(self):
         true = np.loadtxt("Kursawe_fun.dat")

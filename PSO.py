@@ -67,17 +67,17 @@ def LPSO(benchmark, T):
     velocity = np.zeros([N, D])
     lastFitness = np.zeros(N) + float('inf')
     bestFitness = float('inf')
-    neighboorFitness = np.zeros(N) + float('inf')
-    neighboor = []
+    neighborFitness = np.zeros(N) + float('inf')
+    neighbor = []
     Pb = np.zeros([N, D])
     Lb = np.zeros([N, D])
     fitData = []
 
     i = 0
     for node in nx.nodes(graph):
-        neighboor.append([])
+        neighbor.append([])
         for j in nx.all_neighbors(graph, node):
-            neighboor[i].append(j)
+            neighbor[i].append(j)
         i += 1
 
     t = 0
@@ -98,9 +98,9 @@ def LPSO(benchmark, T):
             Gb = position[np.where(fitness == np.min(fitness))[0]]
 
         for index in range(0, N):
-            for j in neighboor[index]:
-                if fitness[j] < neighboorFitness[index]:
-                    neighboorFitness[index] = fitness[j]
+            for j in neighbor[index]:
+                if fitness[j] < neighborFitness[index]:
+                    neighborFitness[index] = fitness[j]
                     Lb[index] = position[j]
         velocity = w * (velocity + c1 * np.random.rand(N, D) * (Pb - position)
                         + c2 * np.random.rand(N, D) * (Lb - position))
@@ -126,17 +126,17 @@ def SFPSO(benchmark, T):
     velocity = np.zeros([N, D])
     lastFitness = np.zeros(N) + float('inf')
     bestFitness = float('inf')
-    neighboorFitness = np.zeros(N) + float('inf')
-    neighboor = []
+    neighborFitness = np.zeros(N) + float('inf')
+    neighbor = []
     Pb = np.zeros([N, D])
     Lb = np.zeros([N, D])
     fitData = []
 
     i = 0
     for node in nx.nodes(graph):
-        neighboor.append([])
+        neighbor.append([])
         for j in nx.all_neighbors(graph, node):
-            neighboor[i].append(j)
+            neighbor[i].append(j)
         i += 1
 
     t = 0
@@ -156,9 +156,9 @@ def SFPSO(benchmark, T):
             Gb = position[np.where(fitness == np.min(fitness))[0]]
 
         for index in range(0, N):
-            for j in neighboor[index]:
-                if fitness[j] < neighboorFitness[index]:
-                    neighboorFitness[index] = fitness[j]
+            for j in neighbor[index]:
+                if fitness[j] < neighborFitness[index]:
+                    neighborFitness[index] = fitness[j]
                     Lb[index] = position[j]
         velocity = w * (velocity + c1 * np.random.rand(N, D) * (Pb - position)
                         + c2 * np.random.rand(N, D) * (Lb - position))
@@ -185,17 +185,17 @@ def LFIPSO(benchmark, T):
     velocity = np.zeros([N, D])
     lastFitness = np.zeros(N) + float('inf')
     bestFitness = float('inf')
-    neighboorFitness = np.zeros(N) + float('inf')
-    neighboor = []
+    neighborFitness = np.zeros(N) + float('inf')
+    neighbor = []
     Pb = np.zeros([N, D])
     Lb = np.zeros([N, D])
     fitData = []
 
     i = 0
     for node in nx.nodes(graph):
-        neighboor.append([])
+        neighbor.append([])
         for j in nx.all_neighbors(graph, node):
-            neighboor[i].append(j)
+            neighbor[i].append(j)
         i += 1
 
     t = 0
@@ -214,10 +214,10 @@ def LFIPSO(benchmark, T):
             Gb = position[np.where(fitness == np.min(fitness))[0]]
 
         for index in range(0, N):
-            for j in neighboor[index]:
+            for j in neighbor[index]:
                 Lb[index] = 0
                 Lb[index] += position[j] * np.random.rand(D) * fi
-            Lb[index] /= neighboor[index].__len__()
+            Lb[index] /= neighbor[index].__len__()
 
         velocity = w * (velocity + Lb)
         position += velocity
@@ -243,17 +243,17 @@ def SFIPSO(benchmark, T):
     velocity = np.zeros([N, D])
     lastFitness = np.zeros(N) + float('inf')
     bestFitness = float('inf')
-    neighboorFitness = np.zeros(N) + float('inf')
-    neighboor = []
+    neighborFitness = np.zeros(N) + float('inf')
+    neighbor = []
     Pb = np.zeros([N, D])
     Lb = np.zeros([N, D])
     fitData = []
 
     i = 0
     for node in nx.nodes(graph):
-        neighboor.append([])
+        neighbor.append([])
         for j in nx.all_neighbors(graph, node):
-            neighboor[i].append(j)
+            neighbor[i].append(j)
         i += 1
 
     t = 0
@@ -272,10 +272,10 @@ def SFIPSO(benchmark, T):
             Gb = position[np.where(fitness == np.min(fitness))[0]]
 
         for index in range(0, N):
-            for j in neighboor[index]:
+            for j in neighbor[index]:
                 Lb[index] = 0
                 Lb[index] += position[j] * np.random.rand(D) * fi
-            Lb[index] /= neighboor[index].__len__()
+            Lb[index] /= neighbor[index].__len__()
 
         velocity = w * (velocity + Lb)
         position += velocity
@@ -302,17 +302,18 @@ def SIPSO(benchmark, T):
     velocity = np.zeros([N, D])
     lastFitness = np.zeros(N) + float('inf')
     bestFitness = float('inf')
-    neighboorFitness = np.zeros(N) + float('inf')
-    neighboor = []
+    neighborFitness = np.zeros(N) + float('inf')
+    neighbor = []
     Pb = np.zeros([N, D])
     Lb = np.zeros([N, D])
+    lbest = np.zeros([N, D])
     fitData = []
 
     i = 0
     for node in nx.nodes(graph):
-        neighboor.append([])
+        neighbor.append([])
         for j in nx.all_neighbors(graph, node):
-            neighboor[i].append(j)
+            neighbor[i].append(j)
         i += 1
 
     t = 0
@@ -326,21 +327,27 @@ def SIPSO(benchmark, T):
                 lastFitness[i] = fitness[i]
                 Pb[i] = position[i]
 
+        for index in range(0, N):
+            for j in neighbor[index]:
+                if fitness[j] < neighborFitness[index]:
+                    neighborFitness[index] = fitness[j]
+                    lbest[index] = position[j]
+
         currentBestFitness = min(lastFitness)
         if currentBestFitness < bestFitness:
             bestFitness = currentBestFitness
             Gb = position[np.where(fitness == np.min(fitness))[0]]
 
         for index in range(0, N):
-            if neighboor[index].__len__() > kc:
-                for j in neighboor[index]:
+            if neighbor[index].__len__() > kc:
+                for j in neighbor[index]:
                     Lb[index] = 0
-                    Lb[index] += position[j] * np.random.rand(D) * fi
-                Lb[index] /= neighboor[index].__len__()
+                    Lb[index] += (Pb[j]-position[j]) * np.random.rand(D) * fi
+                Lb[index] /= neighbor[index].__len__()
                 velocity[index] = w * (velocity[index] + Lb[index])
             else:
                 velocity[index] = w * (velocity[index] + c1 * np.random.rand(D) * (Pb[index] - position[index])
-                                       + c2 * np.random.rand(D) * (Gb[0] - position[index]))
+                                       + c2 * np.random.rand(D) * (lbest[index] - position[index]))
 
         position += velocity
 
@@ -451,17 +458,17 @@ def MPPSO(benchmark, T, N=80):
     counter = np.zeros(N0)
     lastFitness = np.zeros(N0) + float('inf')
     bestFitness = float('inf')
-    neighboorFitness = np.zeros(N0) + float('inf')
-    neighboor = []
+    neighborFitness = np.zeros(N0) + float('inf')
+    neighbor = []
     Pb = np.zeros([N0, D])
     Lb = np.zeros([N0, D])
     fitData = []
 
     i = 0
     for node in nx.nodes(graph):
-        neighboor.append([])
+        neighbor.append([])
         for j in nx.all_neighbors(graph, node):
-            neighboor[i].append(j)
+            neighbor[i].append(j)
         i += 1
 
     # assign swarms in baseNetwork
@@ -491,10 +498,10 @@ def MPPSO(benchmark, T, N=80):
             Gb = position[np.where(fitness == np.min(fitness))[0]]
 
         for i in range(0, N0):
-            for j in neighboor[indexInBaseNetwork[i]]:
+            for j in neighbor[indexInBaseNetwork[i]]:
                 if indexInSwarmNetwork[j] != -1:
-                    if fitness[indexInSwarmNetwork[j]] < neighboorFitness[i]:
-                        neighboorFitness[i] = fitness[indexInSwarmNetwork[j]]
+                    if fitness[indexInSwarmNetwork[j]] < neighborFitness[i]:
+                        neighborFitness[i] = fitness[indexInSwarmNetwork[j]]
                         Lb[i] = position[indexInSwarmNetwork[j]]
 
         velocity = w * (velocity + c1 * np.random.rand(N0, D) * (Pb - position)
@@ -505,7 +512,7 @@ def MPPSO(benchmark, T, N=80):
             if counter[i] > tGap:
                 chooseList = []
                 # only change indexInBaseNetwork and indexInSwarmNetwork
-                for j in neighboor[indexInBaseNetwork[i]]:
+                for j in neighbor[indexInBaseNetwork[i]]:
                     if indexInSwarmNetwork[j] == -1:
                         chooseList.append(j)
                 if len(chooseList) != 0:
